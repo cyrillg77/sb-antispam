@@ -2,7 +2,7 @@
 /**
  * Plugin Name: SB AntiSpam & Captcha
  * Description: Captcha mathématique + honeypot + jeton cookie + liste noire d'emails/domaines (dont domaines jetables) pour commentaires, inscription, WooCommerce, Contact Form 7, Elementor Pro Forms, Forminator et Ninja Forms. Équivalent WordPress du module PrestaShop "AntiSpam and Captcha".
- * Version: 1.2.1
+ * Version: 1.2.2
  * Author: StarBoost
  * Text Domain: sb-antispam
  */
@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) exit;
 
 final class SB_AntiSpam
 {
-    const VERSION    = '1.2.1';
+    const VERSION    = '1.2.2';
     const UPDATE_URL = 'https://raw.githubusercontent.com/cyrillg77/sb-antispam/main/info.json'; // mises à jour via GitHub (dépôt public)
     const OPT   = 'sb_antispam';
     const LOG   = 'sb_antispam_log';
@@ -170,6 +170,7 @@ final class SB_AntiSpam
 
         // Mises à jour auto-hébergées (starboost.fr) : WP affiche la MAJ dans Extensions comme n'importe quel plugin
         add_filter('pre_set_site_transient_update_plugins', [$this, 'check_update']);
+        add_action('delete_site_transient_update_plugins', function () { delete_transient('sb_antispam_update'); }); // « Vérifier à nouveau » force aussi notre vérification
         add_filter('plugins_api', [$this, 'plugin_info'], 10, 3);
 
         add_action('admin_menu', [$this, 'admin_menu']);
