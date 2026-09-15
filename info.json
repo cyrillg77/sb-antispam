@@ -1,0 +1,5 @@
+{
+  "version": "1.2.1",
+  "download_url": "https://github.com/cyrillg77/sb-antispam/releases/latest/download/sb-antispam.zip",
+  "changelog": "<h4>1.2.1</h4><ul><li>Protection connexion wp-login.php et WooCommerce</li><li>Support Ninja Forms, Forminator, Elementor Pro, Contact Form 7</li><li>Jeton anti-cache via REST</li><li>Mises à jour automatiques</li></ul>"
+}
