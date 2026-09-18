@@ -2,7 +2,7 @@
 /**
  * Plugin Name: SB AntiSpam & Captcha
  * Description: Captcha mathématique + honeypot + jeton cookie + liste noire d'emails/domaines (dont domaines jetables) pour commentaires, inscription, WooCommerce, Contact Form 7, Elementor Pro Forms, Forminator et Ninja Forms. Équivalent WordPress du module PrestaShop "AntiSpam and Captcha".
- * Version: 1.2.2
+ * Version: 1.2.3
  * Author: StarBoost
  * Text Domain: sb-antispam
  */
@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) exit;
 
 final class SB_AntiSpam
 {
-    const VERSION    = '1.2.2';
+    const VERSION    = '1.2.3';
     const UPDATE_URL = 'https://raw.githubusercontent.com/cyrillg77/sb-antispam/main/info.json'; // mises à jour via GitHub (dépôt public)
     const OPT   = 'sb_antispam';
     const LOG   = 'sb_antispam_log';
@@ -187,7 +187,9 @@ final class SB_AntiSpam
         $_COOKIE[self::COOKIE] = $token;
     }
 
-    private function cookie() { return sanitize_text_field($_COOKIE[self::COOKIE] ?? ''); }
+    private function cookie() { return $this->str($_COOKIE[self::COOKIE] ?? ''); }
+    // Toujours une chaîne : un tableau envoyé en POST provoquerait une TypeError (PHP 8) au lieu d'un rejet propre
+    private function str($v) { return is_scalar($v) ? sanitize_text_field(wp_unslash((string) $v)) : ''; }
 
     public function fields_html()
     {
@@ -209,7 +211,8 @@ final class SB_AntiSpam
 
     public function render_fields() { echo $this->fields_html(); }
 
-    private function sign($answer, $ts) { return hash_hmac('sha256', $answer . '|' . $ts, wp_salt('nonce')); }
+    // Signature liée au cookie du visiteur : une réponse résolue ne peut pas être rejouée depuis une autre session
+    private function sign($answer, $ts) { return hash_hmac('sha256', $answer . '|' . $ts . '|' . $this->cookie(), wp_salt('nonce')); }
 
     public function front_css() { echo '<style>.sb-hp{position:absolute!important;left:-9999px!important;opacity:0;height:0;width:0}</style>'; }
 
@@ -263,17 +266,17 @@ final class SB_AntiSpam
         $email = sanitize_email($email);
 
         // 1. Honeypot
-        if (!empty($_POST['sb_url'])) return $this->fail("Honeypot rempli [$form] $ip $email");
+        if ($this->str($_POST['sb_url'] ?? '') !== '') return $this->fail("Honeypot rempli [$form] $ip $email");
         // 2. Jeton cookie
         if (empty($_POST['sb_cs']))
             return $this->fail("Jeton absent du POST (champs non transmis par le form builder) [$form] $ip $email");
         if (!$this->cookie())
             return $this->fail("Cookie absent (page servie depuis un cache ?) [$form] $ip $email");
-        if (!hash_equals($this->cookie(), sanitize_text_field($_POST['sb_cs'])))
+        if (!hash_equals($this->cookie(), $this->str($_POST['sb_cs'])))
             return $this->fail("Jeton != cookie (HTML mis en cache) [$form] $ip $email");
         // 3. Captcha (signé HMAC : stateless, non falsifiable côté client)
         if ($this->conf['captcha']) {
-            $ans = (int) ($_POST['sb_answer'] ?? -1); $ts = (int) ($_POST['sb_ts'] ?? 0); $sig = $_POST['sb_sig'] ?? '';
+            $ans = (int) $this->str($_POST['sb_answer'] ?? -1); $ts = (int) $this->str($_POST['sb_ts'] ?? 0); $sig = $this->str($_POST['sb_sig'] ?? '');
             if (time() - $ts > self::TTL || !hash_equals($this->sign($ans, $ts), $sig))
                 return $this->fail("Captcha incorrect [$form] $ip $email", 'Vérification de sécurité échouée.');
         }

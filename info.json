@@ -1,5 +1,5 @@
 {
-  "version": "1.2.2",
+  "version": "1.2.3",
   "download_url": "https://github.com/cyrillg77/sb-antispam/releases/latest/download/sb-antispam.zip",
-  "changelog": "<h4>1.2.2</h4><ul><li>« Vérifier à nouveau » force la vérification de mise à jour</li></ul><h4>1.2.1</h4><ul><li>Protection connexion wp-login.php et WooCommerce</li><li>Support Ninja Forms, Forminator, Elementor Pro, Contact Form 7</li><li>Jeton anti-cache via REST</li><li>Mises à jour automatiques</li></ul>"
+  "changelog": "<h4>1.2.3</h4><ul><li>Signature captcha liée au cookie (anti-rejeu)</li><li>Entrées POST forcées en chaîne (robustesse PHP 8)</li></ul><h4>1.2.2</h4><ul><li>« Vérifier à nouveau » force la vérification de mise à jour</li></ul><h4>1.2.1</h4><ul><li>Protection connexion wp-login.php et WooCommerce</li><li>Support Ninja Forms, Forminator, Elementor Pro, Contact Form 7</li><li>Jeton anti-cache via REST</li><li>Mises à jour automatiques</li></ul>"
 }
